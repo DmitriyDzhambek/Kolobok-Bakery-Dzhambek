@@ -1,0 +1,679 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tabs-height: 80px;
+  --gold: #ffd970;
+  --gold-border: rgb(255 217 112 / 36%);
+  --navy-panel: rgb(13 19 43 / 94%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: #0d1123 url("/assets/buildings/bg_forest.png") center / cover no-repeat fixed;
+}
+
+button {
+  color: inherit;
+  font: inherit;
+}
+
+#game-screen {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+}
+
+.game-stage {
+  position: relative;
+  width: 100vw;
+  max-width: 500px;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #0d1123;
+  background-image:
+    linear-gradient(180deg, rgb(9 13 34 / 8%), rgb(9 13 34 / 16%)),
+    url("/assets/buildings/bg_mountains.png");
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 0 48px rgb(0 0 0 / 30%);
+}
+
+.bakery-scene {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+
+.kolobok-hitbox {
+  position: absolute;
+  z-index: 3;
+  bottom: 160px;
+  left: 50%;
+  width: 80px;
+  height: 92px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 5px 10px rgb(0 0 0 / 50%));
+  transform: translateX(-50%);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kolobok-art {
+  position: absolute;
+  top: -91px;
+  left: -12px;
+  display: block;
+  width: 104px;
+  max-width: none;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+.kolobok-hitbox:active {
+  animation: kolobok-click 180ms ease-out;
+}
+
+.kolobok-hitbox:focus-visible,
+.settings-button:focus-visible,
+.upgrades-shortcut:focus-visible,
+.tab-button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@keyframes kolobok-click {
+  50% {
+    transform: translateX(-50%) scale(0.9) rotate(-4deg);
+  }
+}
+
+.traffic-road {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(var(--tabs-height) + var(--safe-bottom));
+  left: 0;
+  width: 100%;
+  height: 60px;
+  overflow: hidden;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  background: rgb(30 30 40 / 94%);
+}
+
+.road-center-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 30px,
+    rgb(255 255 255 / 48%) 30px 48px,
+    transparent 48px 78px
+  );
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.vehicle {
+  position: absolute;
+  z-index: 1;
+  bottom: var(--lane-bottom, 2px);
+  left: calc(50% - 30px);
+  display: block;
+  width: 60px;
+  height: 28px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: translateZ(0);
+  will-change: left;
+}
+
+.vehicle--driving {
+  left: calc(100% + 60px);
+  animation: vehicle-approach var(--drive-duration) linear forwards;
+}
+
+.vehicle--stopped,
+.vehicle--leaving {
+  left: calc(50% - 30px);
+}
+
+.vehicle--leaving {
+  animation: vehicle-leave var(--drive-duration) linear forwards;
+}
+
+.vehicle--clicked,
+.vehicle:active {
+  filter: drop-shadow(0 0 8px #ffe47c);
+}
+
+.vehicle--clicked {
+  animation-play-state: paused;
+}
+
+.vehicle-art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: 7px;
+  pointer-events: none;
+}
+
+.vehicle-art img {
+  position: absolute;
+  top: -97px;
+  left: -15px;
+  display: block;
+  width: 90px;
+  max-width: none;
+  height: auto;
+  transform: scaleX(-1);
+  user-select: none;
+}
+
+.vehicle-reward {
+  position: absolute;
+  z-index: 4;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  padding: 4px 8px;
+  border: 1px solid #fff0c6;
+  border-radius: 13px;
+  background: #fff9eb;
+  box-shadow: 0 2px 7px rgb(0 0 0 / 25%);
+  color: #96511f;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  animation: reward-pop 180ms ease-out both;
+}
+
+.vehicle-reward::after {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 1px solid #fff0c6;
+  border-bottom: 1px solid #fff0c6;
+  background: #fff9eb;
+  content: "";
+  transform: translateX(-50%) rotate(45deg);
+}
+
+@keyframes vehicle-approach {
+  from {
+    left: calc(100% + 60px);
+  }
+  to {
+    left: calc(50% - 30px);
+  }
+}
+
+@keyframes vehicle-leave {
+  from {
+    left: calc(50% - 30px);
+  }
+  to {
+    left: -64px;
+  }
+}
+
+@keyframes reward-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 5px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.income-panel {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(var(--tabs-height) + 70px + var(--safe-bottom));
+  left: 50%;
+  display: grid;
+  width: min(85%, 400px);
+  height: 65px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--gold-border);
+  border-radius: 35px;
+  background: linear-gradient(145deg, rgb(20 30 59 / 97%), rgb(9 15 36 / 97%));
+  box-shadow: 0 4px 15px rgb(0 0 0 / 48%), inset 0 1px 0 rgb(255 255 255 / 10%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.income-value {
+  position: absolute;
+  z-index: 21;
+  top: 50%;
+  left: 50%;
+  color: var(--gold);
+  font-size: clamp(17px, 4.5vw, 20px);
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 2px 4px #000;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+.income-value strong {
+  font-size: 1.15em;
+}
+
+.wallet-panel {
+  position: absolute;
+  z-index: 30;
+  top: max(20px, var(--safe-top));
+  left: 20px;
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px 4px 5px;
+  border: 1px solid var(--gold-border);
+  border-radius: 16px;
+  background: var(--navy-panel);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 30%);
+  color: var(--gold);
+  font-size: clamp(19px, 5vw, 25px);
+  font-weight: 800;
+}
+
+.coin-icon,
+.settings-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--gold);
+}
+
+.coin-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.coin-icon svg {
+  width: 38px;
+  height: 38px;
+  fill: #f7bb3d;
+  stroke: #fff0b4;
+  stroke-width: 1.5;
+}
+
+.coin-icon svg path {
+  fill: none;
+  stroke: #8a4c15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.wallet-currency {
+  color: #ffe9a7;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.settings-button {
+  position: absolute;
+  z-index: 30;
+  top: max(20px, var(--safe-top));
+  right: 20px;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--gold-border);
+  border-radius: 50%;
+  background: var(--navy-panel);
+  cursor: pointer;
+}
+
+.settings-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.settings-icon svg {
+  width: 30px;
+  height: 30px;
+  fill: var(--gold);
+}
+
+.settings-icon .gear-center {
+  fill: var(--navy-panel);
+  stroke: #9a6a21;
+  stroke-width: 2;
+}
+
+.upgrades-shortcut {
+  position: absolute;
+  z-index: 30;
+  top: 80px;
+  left: 50%;
+  display: flex;
+  width: 200px;
+  height: 45px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgb(255 217 112 / 52%);
+  border-radius: 24px;
+  background: linear-gradient(145deg, #26365d, #111a37);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 32%), inset 0 1px 0 rgb(255 255 255 / 10%);
+  color: #ffe6a0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+
+.shortcut-icon {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(255 217 112 / 15%);
+  color: var(--gold);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.bottom-tabs {
+  position: absolute;
+  z-index: 30;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: calc(var(--tabs-height) + var(--safe-bottom));
+  align-items: center;
+  justify-content: space-around;
+  gap: 6px;
+  padding: 4px 8px var(--safe-bottom);
+  border-top: 1px solid rgb(255 215 0 / 20%);
+  background: #0d1123;
+}
+
+.tab-button {
+  display: flex;
+  width: 32%;
+  height: 60px;
+  flex: 0 1 32%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border: 1px solid rgb(255 217 112 / 16%);
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, rgb(29 39 70 / 95%), rgb(13 17 35 / 98%));
+  color: #bac7e5;
+  cursor: pointer;
+  opacity: 0.68;
+  transition: opacity 150ms ease, transform 150ms ease, border-color 150ms ease;
+}
+
+.tab-button.is-active {
+  border-color: var(--gold-border);
+  color: var(--gold);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.tab-icon {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.tab-label {
+  font-size: clamp(10px, 2.8vw, 12px);
+  font-weight: 700;
+}
+
+.modal-backdrop {
+  position: absolute;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(9 13 28 / 78%);
+}
+
+.upgrade-modal {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: min(90vh, 620px);
+  overflow-y: auto;
+  padding: 24px;
+  border: 2px solid #f7dda0;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #fff5d9, #e9bd7b);
+  box-shadow: 0 12px 45px rgb(0 0 0 / 38%);
+  color: #593b30;
+}
+
+.upgrade-modal h1 {
+  margin: 0 42px 18px 0;
+  font-size: 25px;
+}
+
+.upgrade-list {
+  display: grid;
+  gap: 12px;
+}
+
+.upgrade-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgb(89 59 48 / 18%);
+  border-radius: 15px;
+  background: rgb(255 255 255 / 38%);
+}
+
+.upgrade-card h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.upgrade-card p {
+  margin: 5px 0;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.upgrade-level {
+  color: #75533f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.upgrade-buy {
+  display: grid;
+  min-width: 102px;
+  gap: 3px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: #7e4b25;
+  color: #fff6dc;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.upgrade-buy strong {
+  color: #ffdf74;
+  font-size: 12px;
+}
+
+.upgrade-buy:disabled {
+  background: #8e8178;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(104 65 48 / 12%);
+  color: inherit;
+  cursor: pointer;
+  font-size: 27px;
+}
+
+.game-toast {
+  position: absolute;
+  z-index: 40;
+  bottom: calc(var(--tabs-height) + 18px + var(--safe-bottom));
+  left: 50%;
+  max-width: calc(100% - 28px);
+  padding: 9px 15px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 18px;
+  background: #242b40;
+  box-shadow: 0 3px 12px rgb(0 0 0 / 25%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, 8px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.game-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 380px) {
+  .wallet-panel {
+    left: 10px;
+    min-height: 42px;
+    gap: 6px;
+    padding-right: 8px;
+    font-size: 20px;
+  }
+
+  .coin-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .settings-button {
+    right: 10px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .tab-button {
+    height: 56px;
+  }
+}
+
+@media (min-width: 501px) {
+  .game-stage {
+    width: min(calc(100vw - 48px), 500px);
+    height: min(calc(100dvh - 32px), 940px);
+    border: 1px solid rgb(255 217 112 / 25%);
+    border-radius: 24px;
+    box-shadow: 0 18px 64px rgb(0 0 0 / 62%);
+  }
+}
+
+@media (max-height: 520px) {
+  .kolobok-hitbox {
+    bottom: 145px;
+    height: 76px;
+  }
+
+  .kolobok-art {
+    top: -77px;
+    left: -10px;
+    width: 88px;
+  }
+
+  .income-panel {
+    bottom: calc(var(--tabs-height) + 64px + var(--safe-bottom));
+    height: 52px;
+  }
+
+  .upgrades-shortcut {
+    top: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
